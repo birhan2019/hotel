@@ -181,28 +181,44 @@
             document.getElementById('page-title').innerText = titles[tabId];
         }
 
-        function bookRoom() {
-            const name = document.getElementById('guest-name').value;
-            const roomType = document.getElementById('room-type').value;
+       function bookRoom() {
+    const name = document.getElementById('guest-name').value;
+    const roomType = document.getElementById('room-type').value;
 
-            if(!name.trim()) {
-                alert("እባክዎ የእንግዳውን ስም ያስገቡ!");
-                return;
-            }
+    if(!name.trim()) {
+        alert("እባክዎ የእንግዳውን ስም ያስገቡ!");
+        return;
+    }
 
-            const tbody = document.getElementById('booking-list');
-            const newRow = document.createElement('tr');
-            newRow.className = "border-b";
-            newRow.innerHTML = `
-                <td class="p-3">${name}</td>
-                <td class="p-3">${roomType}</td>
-                <td class="p-3"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">የተያዘ</span></td>
-            `;
-            tbody.appendChild(newRow);
-
-            document.getElementById('guest-name').value = '';
-            alert("ክፍሉ በተሳካ ሁኔታ ተይዟል!");
-        }
+    // መረጃውን ወደ Python Flask Backend (ሰርቨር) መላክ
+    fetch('http://127.0.0.1:5000/api/rooms', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ guest_name: name, room_type: roomType })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message); // ከሰርቨር የሚመጣውን መልእክት ያሳያል
+        
+        // በድረ-ገጹ ላይ ዝርዝሩን ማሳየት
+        const tbody = document.getElementById('booking-list');
+        const newRow = document.createElement('tr');
+        newRow.className = "border-b";
+        newRow.innerHTML = `
+            <td class="p-3">${name}</td>
+            <td class="p-3">${roomType}</td>
+            <td class="p-3"><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">የተያዘ</span></td>
+        `;
+        tbody.appendChild(newRow);
+        document.getElementById('guest-name').value = '';
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert("ሰርቨር ጋር መገናኘት አልተቻለም!");
+    });
+}
 
         function markRight(btn) {
             btn.parentElement.remove();
